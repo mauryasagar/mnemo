@@ -16,16 +16,16 @@ Mnemo is a persistent memory infrastructure that allows distinct AI agents to sh
 
 ---
 
-## Overview
+# Overview
 
-### The Problem
+## The Problem
 
 Modern AI applications suffer from a fundamental flaw: session amnesia.
 - **Session Isolation:** Terminal agents (like Cursor or custom Python scripts) lose all context the moment their process terminates.
 - **Walled Gardens:** Web-based interfaces (ChatGPT, Claude, Gemini) operate in closed ecosystems. A context established in one model cannot be accessed by another.
 - **The Vector Database Trap:** Most memory solutions rely on flat vector search. This lacks provenance (knowing *why* a fact is known) and fails to capture the relational structure between entities (e.g., how Alice connects to Project X and FalkorDB).
 
-### The Solution
+## The Solution
 
 **Mnemo** acts as a universal memory router that decouples AI memory from the AI model itself. 
 
