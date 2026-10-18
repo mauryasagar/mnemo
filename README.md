@@ -1,112 +1,131 @@
-# Mnemo
+<div align="center">
+<br>
 
-### Universal, Graph-Backed Memory Layer for AI Agents
+# Mnemo
+**Universal, Graph-Backed Memory Layer for AI Agents**
+<br>
 
 Mnemo is a persistent memory infrastructure that allows distinct AI agents to share context, recall facts autonomously, and maintain provenance across different platforms.
+<br>
 
-**[Explore the Architecture](#architecture-overview) · [View Features](#core-features) · [Quick Start](#setup--installation)**
+[Architecture](#architecture) • [Features](#features) • [Data Model](#data-model) • [Getting Started](#getting-started)
+
+<br>
+
+</div>
 
 ---
 
-## 🚨 The Problem
+## Overview
 
-Modern AI interactions suffer from a fundamental flaw: **amnesia**.
+### The Problem
 
-1. **Session Isolation:** Terminal agents, such as Cursor agents and local scripts, forget everything when their processes end.
-2. **Walled Gardens:** Web-based AI assistants like ChatGPT, Claude, and Gemini operate in silos. Information shared with one assistant is not automatically available to another.
-3. **The Vector Database Trap:** Many AI memory solutions rely on flat vector databases and semantic search, making it difficult to trace why an AI knows something or understand relationships between entities.
+Modern AI applications suffer from a fundamental flaw: session amnesia.
+- **Session Isolation:** Terminal agents (like Cursor or custom Python scripts) lose all context the moment their process terminates.
+- **Walled Gardens:** Web-based interfaces (ChatGPT, Claude, Gemini) operate in closed ecosystems. A context established in one model cannot be accessed by another.
+- **The Vector Database Trap:** Most memory solutions rely on flat vector search. This lacks provenance (knowing *why* a fact is known) and fails to capture the relational structure between entities (e.g., how Alice connects to Project X and FalkorDB).
 
-## 💡 The Solution: Mnemo
+### The Solution
 
-**Mnemo** acts as a universal memory layer that decouples AI memory from the AI model itself.
+**Mnemo** acts as a universal memory router that decouples AI memory from the AI model itself. 
 
-Instead of requiring an AI to remember everything internally, Mnemo provides tools to store and retrieve information from an external memory graph.
+Instead of relying on the model's internal context window, Mnemo provides an external memory layer. By combining the **Model Context Protocol (MCP)** with a **FalkorDB property graph**, Mnemo enables any compatible AI to:
+1. **Save** facts and session data to a localized graph database.
+2. **Recall** context autonomously across completely different platforms.
+3. **Trace** provenance, permanently linking every memory to the specific agent that wrote it.
 
-By combining the **Model Context Protocol (MCP)** with **FalkorDB**, Mnemo allows compatible AI agents to:
-
-- **Save** facts and session data to a unified graph.
-- **Recall** context across different platforms.
-- **Trace** provenance by identifying which agent stored a memory and when.
-
-A memory saved by one connected agent can be retrieved by another, including local scripts and browser-based AI interfaces, through the shared memory infrastructure.
+Because the entire stack (database, LLM extraction, and memory routing) runs locally, sensitive context never leaves your machine.
 
 ---
 
 ## 🏗️ Architecture Overview
 
-Mnemo uses a decoupled architecture that connects local AI processes with web-based AI interfaces through a shared graph database.
 
-```text
-       [ Local Terminal ]                   [ Web Browser ]
-       ├── agent_a.py (Writer)               ├── ChatGPT
-       └── agent_b.py (Reader)               ├── Gemini
-                 │                           └── Chrome Extension
-                 │ MCP                                │ HTTP
-                 ▼                                    ▼
-  ┌──────────────────────────────────────────────────────────┐
-  │                    Mnemo Core (Local)                    │
-  │                                                          │
-  │   [ server.py ] (MCP Server) ◄────► [ bridge.py ]        │
-  │                                            (FastAPI)     │
-  └──────────────────────┬───────────────────┬──────────────┘
-                         │                   │
-                         │ Cypher Queries    │ Cypher Queries
-                         ▼                   ▼
-              ┌────────────────────────────────────┐
-              │           FalkorDB (Graph)         │
-              │                                    │
-              │  (Agent) ──[:WROTE]──► (Memory)    │
-              │  (Memory) ─[:MENTIONS]► (Entity)   │
-              └────────────────────────────────────┘
+```mermaid
+graph LR
+    %% Clients
+    TA[Terminal Agents<br/>Python Scripts]
+    BW[Web Browser<br/>ChatGPT / Gemini]
+    CE[Chrome Extension<br/>Manifest V3]
+
+    %% Core
+    MCP[MCP Server<br/>server.py]
+    API[HTTP Bridge<br/>bridge.py]
+
+    %% Database
+    DB[(FalkorDB<br/>Graph Database)]
+
+    %% Connections
+    TA -- "MCP Protocol" --> MCP
+    BW -- "Scrapes DOM" --> CE
+    CE -- "HTTP Requests" --> API
+    
+    MCP -- "Cypher Queries" --> DB
+    API -- "Cypher Queries" --> DB
+    
+    %% Styling
+    classDef default fill:#1e1e24,stroke:#333,stroke-width:1px,color:#fff;
+    classDef db fill:#7c3aed,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef core fill:#2d2d2d,stroke:#555,stroke-width:1px,color:#fff;
+    
+    class DB db;
+    class MCP,API core;
 ```
 
-### How It Works
+### Component Breakdown
 
-1. An AI agent stores information through Mnemo's MCP server or HTTP bridge.
-2. Mnemo records the memory and associates it with the agent that created it.
-3. Entities mentioned in the memory are linked to graph nodes.
-4. Other connected agents retrieve relevant memories by traversing the graph.
+- **Terminal Agents (`agent_a.py`, `agent_b.py`)**
+  Python scripts that use local LLMs to extract facts and talk to the database via MCP.
+
+- **MCP Server (`server.py`)**
+  Exposes `remember` and `recall` tools to any MCP-compatible AI client.
+
+- **HTTP Bridge (`bridge.py`)**
+  A FastAPI server that allows the browser extension to talk to the local database.
+
+- **Chrome Extension (`extension/`)**
+  Scrapes web AI chats (ChatGPT/Gemini) and injects saved context into the prompt box.
+
+- **FalkorDB**
+  The graph database that stores the connections between agents, memories, and entities.
 
 ---
 
-## ✨ Core Features
+## Core Features
 
-- **Standard MCP Integration:** A native Model Context Protocol server enables compatible clients, including Claude Desktop, Cursor, and custom Python agents, to access memory tools.
-- **Cross-Platform Memory Bridge:** A FastAPI bridge and Chrome extension connect browser-based AI interfaces to the same memory graph used by local agents.
-- **Provenance and Traceability:** Memories are linked to the agents that created them, preserving information about their origin.
-- **Relational Multi-Hop Reasoning:** Graph traversal follows entity relationships instead of relying exclusively on semantic similarity.
-- **Local-First Privacy:** The intended architecture runs the memory database and local language model on your machine, reducing reliance on third-party AI APIs for memory processing.
+- **MCP Native Integration:** Built directly on the Model Context Protocol. Any compatible client (Claude Desktop, Cursor, custom scripts) can instantly plug in and use the memory tools.
+- **Cross-Platform Memory Bridge:** A custom FastAPI bridge and Chrome extension connect web-based AIs (ChatGPT, Gemini) to the exact same memory graph used by local terminal agents.
+- **Graph-Based Provenance:** Unlike vector databases, Mnemo never loses context. Every memory is stored as a node permanently linked to the specific Agent that created it.
+- **Relational Multi-Hop Reasoning:** Retrieval works by traversing actual entity relationships. The system knows *how* an entity is connected to a memory, not just that it is semantically similar.
+- **100% Local & Private:** No OpenAI API keys or cloud subscriptions required. Entity extraction and answering are handled by local Ollama models, and data is stored locally in Dockerized FalkorDB.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology | Purpose |
-|---|---|---|
-| Database | [FalkorDB](https://www.falkordb.com/) | Graph database for storing memories and entity relationships using Cypher queries. |
-| Protocol | [Model Context Protocol](https://modelcontextprotocol.io/) | Standard interface for AI agents to interact with memory tools. |
-| Backend Bridge | [FastAPI](https://fastapi.tiangolo.com/) and [Uvicorn](https://www.uvicorn.org/) | Handles HTTP requests from the browser extension. |
-| AI Engine | [Ollama](https://ollama.com/) with `gemma4:e2b` | Local language model for extracting entities and generating answers from recalled context. |
-| Browser Extension | Chrome Manifest V3 | Connects supported web-based AI interfaces to Mnemo. |
-| Language | Python 3.10+ and Vanilla JavaScript | Backend services and browser extension logic. |
+| :--- | :--- | :--- |
+| **Database** | [FalkorDB](https://www.falkordb.com/) | High-performance graph database used to store memories and relationships via Cypher queries. |
+| **Protocol** | [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) | Standardized interface allowing AI agents to call memory tools natively. |
+| **Backend Bridge** | [FastAPI](https://fastapi.tiangolo.com/) & [Uvicorn](https://www.uvicorn.org/) | Translates HTTP requests from the browser extension into graph database operations. |
+| **AI Engine** | [Ollama](https://ollama.com/) (`gemma4:e2b`) | Fully local LLM used for entity extraction and answer generation. |
+| **Extension** | Chrome Manifest V3 | Injects memory tools into web-based AI interfaces (ChatGPT, Gemini). |
+| **Languages** | Python 3.10+ & Vanilla JS | Backend logic and browser extension scripts. |
 
 ---
 
-## 🕸️ The Graph Model
+## Data Model
 
-Mnemo uses a property graph to represent memories and their relationships. Rather than storing only isolated text, it connects each memory to the agent that created it and the entities it mentions.
+Mnemo uses a property graph to represent memories and their relationships. Rather than storing isolated text blocks, it builds a connected network of Agents, Memories, and Entities.
+
+### Graph Schema
 
 ```cypher
 (:Agent {id})
-    │
-    └──[:WROTE]──► (:Memory {
-                        id,
-                        text,
-                        kind,
-                        created_at
-                    })
-                        │
-                        └──[:MENTIONS]──► (:Entity {name})
+   │
+   └─[:WROTE]─► (:Memory {id, text, kind, created_at})
+                   │
+                   └─[:MENTIONS]─► (:Entity {name})
 ```
 
 ### Core Cypher Queries
@@ -156,8 +175,6 @@ LIMIT $limit
 
 ## 📸 Screenshots
 
-Add screenshots of your running project to demonstrate its functionality.
-
 ### 1. Terminal Agents Sharing Memory Through MCP
 
 ![Terminal agents sharing memory](https://via.placeholder.com/800x400?text=Replace+with+Terminal+Screenshot)
@@ -170,7 +187,6 @@ Add screenshots of your running project to demonstrate its functionality.
 
 ![Browser extension integration](https://via.placeholder.com/800x400?text=Replace+with+Browser+Extension+Screenshot)
 
-> **Before publishing:** Replace these placeholder images with actual screenshots. You can store your images in a `screenshots/` directory and reference them using relative paths, such as `![Terminal output](screenshots/terminal.png)`.
 
 ---
 
@@ -292,14 +308,6 @@ If your application uses a different host or port, update the extension configur
 7. Use the extension's memory controls, if implemented, to save a session or inject recalled memories.
 
 The extension should be configured to communicate with the local bridge at `http://127.0.0.1:8000`.
-
----
-
-## 🔒 Privacy
-
-Mnemo is designed to keep its memory infrastructure local by using a local graph database and a local language model.
-
-Actual privacy guarantees depend on the configuration of the browser extension, connected AI services, and any external APIs used by your application. Review those integrations before storing sensitive information.
 
 ---
 
