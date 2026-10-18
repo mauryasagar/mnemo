@@ -8,7 +8,7 @@
 Mnemo is a persistent memory infrastructure that allows distinct AI agents to share context, recall facts autonomously, and maintain provenance across different platforms.
 <br>
 
-[Architecture](#architecture) • [Features](#features) • [Data Model](#data-model) • [Getting Started](#getting-started)
+[Architecture](#architecture-overview) • [Features](#features) • [Data Model](#data-model) • [Getting Started](#getting-started)
 
 <br>
 
@@ -38,7 +38,7 @@ Because the entire stack (database, LLM extraction, and memory routing) runs loc
 
 ---
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 
 ```mermaid
@@ -91,7 +91,7 @@ graph LR
 
 ---
 
-## Core Features
+## Features
 
 - **MCP Native Integration:** Built directly on the Model Context Protocol. Any compatible client (Claude Desktop, Cursor, custom scripts) can instantly plug in and use the memory tools.
 - **Cross-Platform Memory Bridge:** A custom FastAPI bridge and Chrome extension connect web-based AIs (ChatGPT, Gemini) to the exact same memory graph used by local terminal agents.
@@ -173,7 +173,7 @@ LIMIT $limit
 
 ---
 
-## 🚀 Setup & Installation
+## Getting started
 
 Follow these steps to run Mnemo locally.
 
