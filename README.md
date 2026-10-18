@@ -173,23 +173,6 @@ LIMIT $limit
 
 ---
 
-## 📸 Screenshots
-
-### 1. Terminal Agents Sharing Memory Through MCP
-
-![Terminal agents sharing memory](https://via.placeholder.com/800x400?text=Replace+with+Terminal+Screenshot)
-
-### 2. FalkorDB Graph Visualization
-
-![FalkorDB graph visualization](https://via.placeholder.com/800x400?text=Replace+with+FalkorDB+Graph+Screenshot)
-
-### 3. Browser Extension Integration
-
-![Browser extension integration](https://via.placeholder.com/800x400?text=Replace+with+Browser+Extension+Screenshot)
-
-
----
-
 ## 🚀 Setup & Installation
 
 Follow these steps to run Mnemo locally.
