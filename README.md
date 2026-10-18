@@ -184,7 +184,7 @@ Make sure you have the following installed:
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - [Python 3.10 or later](https://www.python.org/downloads/)
 - [Ollama](https://ollama.com/)
-- Git, if you are cloning the repository
+- Git
 
 ### 1. Start FalkorDB
 
