@@ -311,6 +311,6 @@ The extension should be configured to communicate with the local bridge at `http
 
 ---
 
-## 📄 License
+## License
 
-Add your chosen license here, along with a link to the repository's `LICENSE` file if one exists.
+Distributed under the MIT License.
