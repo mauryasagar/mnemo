@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      width: 220px;
+      margin: 0;
+      padding: 12px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #1e1e1e; /* Sleek dark background */
+      color: #cccccc;
+    }
+    .header {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888888;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #333333;
+    }
+    .btn {
+      width: 100%;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      background-color: #2d2d2d;
+      border: 1px solid #404040;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 13px;
+      text-align: left;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+    .btn:hover {
+      background-color: #3e3e3e;
+      border-color: #555555;
+    }
+    .status {
+      font-size: 11px;
+      color: #888888;
+      text-align: center;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">Mnemo Memory</div>
+  <button class="btn" id="injectBtn">Inject Memories</button>
+  <button class="btn" id="saveBtn">Save Session</button>
+  <div class="status" id="status">Ready</div>
+  <script src="popup.js"></script>
+</body>
+</html>
